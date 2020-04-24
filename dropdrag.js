@@ -13,6 +13,8 @@ register_drag_listener = ( function() {
     var dragged
     var drag_listeners = new Map() // key=element, value=did it touch the draggable
     var have_set_global_listeners = false
+    var dragElementOffsetX = 0
+    var dragElementOffsetY = 0
 
     if(!have_set_global_listeners) {
         document.addEventListener("mousedown", mouse_event => {
@@ -38,8 +40,8 @@ register_drag_listener = ( function() {
     }
 
     var set_dragged_offset = mouse_event => {
-        dragged.dragElementOffsetX = mouse_event.offsetX + margin_left(mouse_event.target)
-        dragged.dragElementOffsetY = mouse_event.offsetY + margin_top(mouse_event.target)
+        dragElementOffsetX = mouse_event.offsetX + margin_left(mouse_event.target)
+        dragElementOffsetY = mouse_event.offsetY + margin_top(mouse_event.target)
     }
     var set_draggable_reset_pos_function = _ => {
         var old_style_position = dragged.style.position
@@ -52,8 +54,8 @@ register_drag_listener = ( function() {
         }
     }
     var move_fixed_pos_dragged = mouse_event => {
-        dragged.style.top = add_px(mouse_event.clientY - dragged.dragElementOffsetY)
-        dragged.style.left = add_px(mouse_event.clientX - dragged.dragElementOffsetX)
+        dragged.style.top = add_px(mouse_event.clientY - dragElementOffsetY)
+        dragged.style.left = add_px(mouse_event.clientX - dragElementOffsetX)
         dragged.style.position = "fixed"
     }
     var fire_events_if_dragged_touches_listeners = _ => {
