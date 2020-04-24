@@ -20,6 +20,7 @@ register_drag_listener = ( function() {
             dragged = mouse_event.target
             set_dragged_offset(mouse_event)
             set_draggable_reset_pos_function()
+            mouse_event.preventDefault()
         })
         document.addEventListener("mousemove", mouse_event => {
             if(!dragged) return
