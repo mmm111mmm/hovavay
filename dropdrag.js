@@ -94,13 +94,15 @@ function setup_dragging() {
             var hit_listener = rect_in_rect(listener, dragged)
             if(hit_listener) listeners_found.push(listener)
         }
-        if(listeners_found.length == 0) dragged.reset_positioning()
-        var to_drop = find_listener_with_most_overlap(dragged, listeners_found)
-        to_drop.dispatchEvent(dragged_event("drag_drop", dragged))
-        for(var [listener, was_previously_hit] of drag_listeners) {
-            drag_listeners.set(listener, false)
-            if(listener != to_drop && was_previously_hit) 
-                listener.dispatchEvent(dragged_event("drag_leave", dragged))
+        if(listeners_found.length == 0)  dragged.reset_positioning()
+        else {
+            var to_drop = find_listener_with_most_overlap(dragged, listeners_found)
+            to_drop.dispatchEvent(dragged_event("drag_drop", dragged))
+            for(var [listener, was_previously_hit] of drag_listeners) {
+                drag_listeners.set(listener, false)
+                if(listener != to_drop && was_previously_hit) 
+                    listener.dispatchEvent(dragged_event("drag_leave", dragged))
+            }
         }
     }
 
