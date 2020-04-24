@@ -1,4 +1,4 @@
-function setup_dragging() {
+register_drag_listener = ( function() {
     var remove_px = value => parseInt(value.slice(0, -2))
     var margin_top = el => remove_px(window.getComputedStyle(el).getPropertyValue('margin-top'))
     var margin_left = el => remove_px(window.getComputedStyle(el).getPropertyValue('margin-left'))
@@ -111,4 +111,4 @@ function setup_dragging() {
         drag_listeners.set(drag_listener_element, false)
         return drag_listener_element
     }
-}
+} )()
