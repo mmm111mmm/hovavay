@@ -131,66 +131,66 @@
  * hover_rearrange_callback: implement all the margin rearrangement yourself
  **/
 function rearrangeable_vertical_list({list_parent, dragged, hover_rearrange_callback}) {
-  var create_margin_rearrange_list_space = _ => {
-    var add_px = text => text + "px"
-    var remove_px = text => parseInt(text.slice(0, -2))
-    var margin_top_bottom = el =>
-    remove_px(window.getComputedStyle(el).getPropertyValue('margin-top')) + remove_px(window.getComputedStyle(el).getPropertyValue('margin-bottom'))
-    var height_of_dragged = dragged.offsetHeight + margin_top_bottom(dragged)
-    var reset_margin_fn = _ => {}
-    return ({finish_rearrange, above_dragged_element, is_above_first}) => {
-      reset_margin_fn()
-      if(finish_rearrange) return
-      else if (is_above_first) {
-        var old_top = above_dragged_element.style.marginTop
-        reset_margin_fn = _ => above_dragged_element.style.marginTop = old_top
-        above_dragged_element.style.marginTop = add_px(height_of_dragged)
-      } else {
-        var old_bottom = above_dragged_element.style.marginBottom
-        reset_margin_fn = _ => above_dragged_element.style.marginBottom = old_bottom
-        above_dragged_element.style.marginBottom = add_px(height_of_dragged)
-      }
+    var create_margin_rearrange_list_space = _ => {
+        var add_px = text => text + "px"
+        var remove_px = text => parseInt(text.slice(0, -2))
+        var margin_top_bottom = el =>
+        remove_px(window.getComputedStyle(el).getPropertyValue('margin-top')) + remove_px(window.getComputedStyle(el).getPropertyValue('margin-bottom'))
+        var height_of_dragged = dragged.offsetHeight + margin_top_bottom(dragged)
+        var reset_margin_fn = _ => {}
+        return ({finish_rearrange, above_dragged_element, is_above_first}) => {
+            reset_margin_fn()
+            if(finish_rearrange) return
+            else if (is_above_first) {
+                var old_top = above_dragged_element.style.marginTop
+                reset_margin_fn = _ => above_dragged_element.style.marginTop = old_top
+                above_dragged_element.style.marginTop = add_px(height_of_dragged)
+            } else {
+                var old_bottom = above_dragged_element.style.marginBottom
+                reset_margin_fn = _ => above_dragged_element.style.marginBottom = old_bottom
+                above_dragged_element.style.marginBottom = add_px(height_of_dragged)
+            }
+        }
     }
-  }
-  if(!hover_rearrange_callback) hover_rearrange_callback = create_margin_rearrange_list_space()
-  var rect_middle = r => r.top + (r.height / 2)
-  var offset_middle = el =>  el.offsetTop + (el.offsetHeight / 2) 
-  var list = [...list_parent.children].filter(c => c != dragged)
-  var element_above_the_dragged = _ => {
-    var top_side = dragged.offsetTop
-    var middle_side = offset_middle(dragged)
-    for (var i = 0; i < list.length; i++) {
-      var r = list[i].getBoundingClientRect(); var r1;
-      if(list[i+1]) r1 = list[i+1].getBoundingClientRect()
-      var item_top = r.top 
-      var item_middle = rect_middle(r)
-      var next_item_middle = r1 ? rect_middle(r1) : 0
-      if (i == list.length - 1 && middle_side >= item_middle) {
-        return list[i] // last item
-      } else if (next_item_middle && middle_side >= item_middle && middle_side < next_item_middle) {
-        return list[i] // past middle of other
-      } else if (i == 0 && (middle_side <= item_middle || top_side <= item_top)) {
-        return undefined // before first
-      }
+    if(!hover_rearrange_callback) hover_rearrange_callback = create_margin_rearrange_list_space()
+    var rect_middle = r => r.top + (r.height / 2)
+    var offset_middle = el =>  el.offsetTop + (el.offsetHeight / 2) 
+    var list = [...list_parent.children].filter(c => c != dragged)
+    var element_above_the_dragged = _ => {
+        var top_side = dragged.offsetTop
+        var middle_side = offset_middle(dragged)
+        for (var i = 0; i < list.length; i++) {
+            var r = list[i].getBoundingClientRect(); var r1;
+            if(list[i+1]) r1 = list[i+1].getBoundingClientRect()
+            var item_top = r.top 
+            var item_middle = rect_middle(r)
+            var next_item_middle = r1 ? rect_middle(r1) : 0
+            if (i == list.length - 1 && middle_side >= item_middle) {
+                return list[i] // last item
+            } else if (next_item_middle && middle_side >= item_middle && middle_side < next_item_middle) {
+                return list[i] // past middle of other
+            } else if (i == 0 && (middle_side <= item_middle || top_side <= item_top)) {
+                return undefined // before first
+            }
+        }
+        alert("error")
     }
-    alert("error")
-  }
-  return { 
-    update: _ => {
-      var above_dragged_element = element_above_the_dragged()
-      hover_rearrange_callback({finish_rearrange: false, 
-                                above_dragged_element: above_dragged_element ? above_dragged_element : list[0],
-                                is_above_first: !above_dragged_element }) 
-    }, 
-    insert: _ => {
-      var above_dragged_element = element_above_the_dragged()
-      hover_rearrange_callback({finish_rearrange: true}) 
-      if (above_dragged_element == undefined) {
-        list_parent.insertBefore(dragged, list[0])
-      } else {
-        list_parent.insertBefore(dragged, above_dragged_element.nextSibling)
-      } 
-    },
-    reset: _ => hover_rearrange_callback({finish_rearrange: true}) 
-  }
+    return { 
+        update: _ => {
+            var above_dragged_element = element_above_the_dragged()
+            hover_rearrange_callback({finish_rearrange: false, 
+                        above_dragged_element: above_dragged_element ? above_dragged_element : list[0],
+                        is_above_first: !above_dragged_element }) 
+        }, 
+        insert: _ => {
+            var above_dragged_element = element_above_the_dragged()
+            hover_rearrange_callback({finish_rearrange: true}) 
+            if (above_dragged_element == undefined) {
+                list_parent.insertBefore(dragged, list[0])
+            } else {
+                list_parent.insertBefore(dragged, above_dragged_element.nextSibling)
+            } 
+        },
+        reset: _ => hover_rearrange_callback({finish_rearrange: true}) 
+    }
 }
