@@ -1,7 +1,7 @@
 /**
  * Call register_drag_listener() on an element
  * and that element receive "drag_enter", "drag_leave", "drag_over", "drag_drop" events
- * with { dragged: the_elements_thats_dragged, start_pos: start_bounding_rect_plus_stye_left_top_position } 
+ * with { dragged: the_elements_thats_dragged, start_pos: start_bounding_rect_plus_style_left_top_position } 
  * as the event's `detail` param.
  *
  * Elements with the `dragged` css class will be dragged. They will received "drag_start"
