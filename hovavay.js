@@ -14,14 +14,10 @@
     var margin_left = el => remove_px(window.getComputedStyle(el).getPropertyValue('margin-left'))
     var has_css_class = (element, name) => element.classList.contains(name)
     var dragged_event = name => new CustomEvent(name, { detail: { dragged: dragged, start_pos: start_drag_pos } })
-    var rect_in_rect = (element1, element2) => {
-        var rect1 = element1.getBoundingClientRect(); var rect2 = element2.getBoundingClientRect()
-        return rect1.right >= rect2.left && rect1.left <= rect1.right &&
-            rect1.bottom >= rect2.top && rect1.top <= rect2.bottom
-    } // end utiltiy functions
+    // end utiltiy functions
     var dragged // the thing we're dragging
     var drag_listeners = new Map() // key=element, value=did it touch the draggable
-    var start_drag_pos; // in form of getBoundingClientRect plus left, top and position
+    var start_drag_pos // in form of getBoundingClientRect plus left, top and position
     var have_set_global_listeners = false
     var dragElementOffsetX = 0
     var dragElementOffsetY = 0
