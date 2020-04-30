@@ -1,10 +1,11 @@
 /**
  * Call register_drag_listener() on an element
  * and that element receive "drag_enter", "drag_leave", "drag_over", "drag_drop" events
- * with { dragged: the_elements_thats_dragged } as the event's `detail` param.
+ * with { dragged: the_elements_thats_dragged, start_pos: start_bounding_rect_plus_stye_left_top_position } 
+ * as the event's `detail` param.
  *
  * Elements with the `dragged` css class will be dragged. They will received "drag_start"
- * "drag_end" and "drag_fail" events - the last one if it found no place to be dropped.
+ * "drag_end" and "drag_fail" events - the last one if it found no place to be dropped - with the same detail object above.
  */
 [register_drag_listener, deregister_drag_listener] = (function () {
     var add_px = value => value + "px"
@@ -12,7 +13,7 @@
     var margin_top = el => remove_px(window.getComputedStyle(el).getPropertyValue('margin-top'))
     var margin_left = el => remove_px(window.getComputedStyle(el).getPropertyValue('margin-left'))
     var has_css_class = (element, name) => element.classList.contains(name)
-    var dragged_event = (name, ob) => new CustomEvent(name, { detail: { dragged: ob } })
+    var dragged_event = name => new CustomEvent(name, { detail: { dragged: dragged, start_pos: start_drag_pos } })
     var rect_in_rect = (element1, element2) => {
         var rect1 = element1.getBoundingClientRect(); var rect2 = element2.getBoundingClientRect()
         return rect1.right >= rect2.left && rect1.left <= rect1.right &&
@@ -20,14 +21,19 @@
     } // end utiltiy functions
     var dragged // the thing we're dragging
     var drag_listeners = new Map() // key=element, value=did it touch the draggable
+    var start_drag_pos; // in form of getBoundingClientRect plus left, top and position
     var have_set_global_listeners = false
     var dragElementOffsetX = 0
     var dragElementOffsetY = 0
     if (!have_set_global_listeners) {
         document.addEventListener("mousedown", mouse_event => {
             if (!has_css_class(mouse_event.target, "draggable")) return
+            start_drag_pos = mouse_event.target.getBoundingClientRect()
+            start_drag_pos.left = mouse_event.target.left
+            start_drag_pos.top = mouse_event.target.top
+            start_drag_pos.position = mouse_event.target.position
             dragged = mouse_event.target
-            dragged.dispatchEvent(dragged_event("drag_start", dragged))
+            dragged.dispatchEvent(dragged_event("drag_start"))
             dragElementOffsetX = mouse_event.offsetX + margin_left(mouse_event.target)
             dragElementOffsetY = mouse_event.offsetY + margin_top(mouse_event.target)
             mouse_event.preventDefault()
@@ -40,9 +46,10 @@
         })
         document.addEventListener("mouseup", e => {
             if (!dragged) return
-            dragged.dispatchEvent(dragged_event("drag_end", dragged))                  
+            dragged.dispatchEvent(dragged_event("drag_end"))                  
             find_listener_to_give_drop_event()
             dragged = undefined
+            start_drag_pos = undefined
         })
         have_set_global_listeners = true
     }
@@ -57,16 +64,16 @@
         if(listeners_found.length != 0) {
             var found = listeners_found[0]
             if (drag_listeners.get(found) == false) {
-                found.dispatchEvent(dragged_event("drag_enter", dragged))
+                found.dispatchEvent(dragged_event("drag_enter"))
             } else {
-                found.dispatchEvent(dragged_event("drag_over", dragged))
+                found.dispatchEvent(dragged_event("drag_over"))
             }
             drag_listeners.set(found, true)
         }
         for([listener, _] of drag_listeners) {
             if (listener == found) continue
             if (drag_listeners.get(listener) == true)
-                listener.dispatchEvent(dragged_event("drag_leave", dragged))
+                listener.dispatchEvent(dragged_event("drag_leave"))
             drag_listeners.set(listener, false)
         }
     }
@@ -103,11 +110,11 @@
     }
     var find_listener_to_give_drop_event = _ => {
         var listeners_found = listeners_with_overlap()
-        if (listeners_found.length == 0) dragged.dispatchEvent(dragged_event("drag_fail", dragged))
+        if (listeners_found.length == 0) dragged.dispatchEvent(dragged_event("drag_fail"))
         else {
-            listeners_found[0].dispatchEvent(dragged_event("drag_drop", dragged))
+            listeners_found[0].dispatchEvent(dragged_event("drag_drop"))
             listeners_found.slice(1).forEach(other => {
-                other.dispatchEvent(dragged_event("drag_leave", dragged))
+                other.dispatchEvent(dragged_event("drag_leave"))
             })
         }
         for([listener, _] of drag_listeners) drag_listeners.set(listener, false)
